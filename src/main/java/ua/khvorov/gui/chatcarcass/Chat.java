@@ -14,6 +14,7 @@ public class Chat {
 
     private static JTextArea chatTextArea;
     private static JTextArea inputTextField;
+    private static JFrame mainFrame;
     private static final Logger LOGGER = LoggerFactory.getLogger(Chat.class);
 
     public Chat() {
@@ -21,7 +22,7 @@ public class Chat {
     }
 
     private JFrame mainFrame() {
-        JFrame mainFrame = new JFrame();
+        mainFrame = new JFrame();
         mainFrame.add(mainPanel());
 
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -80,4 +81,31 @@ public class Chat {
         chatTextArea.append(message + "\n");
         LOGGER.debug("Message `{}` was successfully appended to chat", message);
     }
+
+    /**
+     * Dialogs
+     */
+    public static void showServerIsOfflineMessage() {
+        JOptionPane.showMessageDialog(null,
+                "  Server is offline",
+                "",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static String askServerIp() {
+        return JOptionPane.showInputDialog(
+                mainFrame,
+                "Enter IP Address of the Server:",
+                "Network chat",
+                JOptionPane.QUESTION_MESSAGE);
+    }
+
+    public static String askServerPort() {
+        return JOptionPane.showInputDialog(
+                mainFrame,
+                "Enter port of the Server:",
+                "Network chat",
+                JOptionPane.QUESTION_MESSAGE);
+    }
+
 }
