@@ -6,13 +6,9 @@ import java.io.IOException;
 
 public class InputFont {
 
-    private static Font inputFont;
+    public final static Font INPUT_FONT = initInputFont();
 
-    public static Font getInputFont() {
-        if (inputFont != null) {
-            return inputFont;
-        }
-
+    private static Font initInputFont() {
         Font font = null;
         try {
             font = Font.createFont(Font.TRUETYPE_FONT, new File("src\\main\\resources\\fonts\\inputFont.ttf"))
@@ -25,4 +21,6 @@ public class InputFont {
         }
         return font;
     }
+
+
 }
