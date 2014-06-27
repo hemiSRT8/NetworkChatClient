@@ -1,12 +1,10 @@
 package ua.khvorov.starter;
 
 
-import ua.khvorov.client.Client;
-import ua.khvorov.gui.chatcarcass.Chat;
+import ua.khvorov.service.ServerUpdateService;
 
 public class Starter {
     public static void main(String[] args) {
-        new Chat();
-        new Client();
+        new ServerUpdateService().initUserUI();
     }
 }
