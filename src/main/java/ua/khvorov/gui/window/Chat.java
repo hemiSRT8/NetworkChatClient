@@ -1,7 +1,6 @@
 package ua.khvorov.gui.window;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 import ua.khvorov.gui.fonts.InputFont;
 import ua.khvorov.gui.listeners.SendButtonListener;
 import ua.khvorov.service.ServerUpdateService;
@@ -9,8 +8,7 @@ import ua.khvorov.service.ServerUpdateService;
 import javax.swing.*;
 import java.awt.*;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.RED;
+import static java.awt.Color.*;
 
 public class Chat {
 
@@ -19,10 +17,12 @@ public class Chat {
     private JTextArea chatTextArea;
     private ServerUpdateService serverUpdateService;
     private JFrame frame;
+    private JButton sendButton;
 
     public Chat(ServerUpdateService serverUpdateService) {
         this.serverUpdateService = serverUpdateService;
         frame = initFrame();
+        frame.getRootPane().setDefaultButton(sendButton);
     }
 
     private JFrame initFrame() {
@@ -31,14 +31,13 @@ public class Chat {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setIconImage(new ImageIcon("resources\\NetworkChatIcon.png").getImage());
+        frame.setIconImage(new ImageIcon("resources\\networkChatIcon.png").getImage());
         frame.pack();
         frame.setSize(800, 400);
         frame.setLocation(screenSize.width / 2 - (frame.getWidth() / 2), //Center of the screen
                 screenSize.height / 2 - (frame.getHeight() / 2));
 
         frame.setVisible(true);
-
         return frame;
     }
 
@@ -61,7 +60,8 @@ public class Chat {
         inputTextField.setFont(InputFont.INPUT_FONT);
 
         panel.add(new JScrollPane(inputTextField), BorderLayout.CENTER);
-        panel.add(sendButton(inputTextField), BorderLayout.LINE_END);
+        constructSendButton(inputTextField);
+        panel.add(sendButton, BorderLayout.LINE_END);
 
         return panel;
     }
@@ -74,12 +74,10 @@ public class Chat {
         return chatTextArea;
     }
 
-    private JButton sendButton(JTextArea inputTextField) {
-        JButton sendButton = new JButton("SEND");
+    private void constructSendButton(JTextArea inputTextField) {
+        sendButton = new JButton("SEND");
         sendButton.addActionListener(SendButtonListener.constructListener(inputTextField, serverUpdateService));
         sendButton.setPreferredSize(new Dimension(100, 65));
-
-        return sendButton;
     }
 
     public void appendToChat(String message) {
@@ -87,15 +85,11 @@ public class Chat {
         LOGGER.debug("Message `{}` was successfully appended to chat", message);
     }
 
-
-    public void showServerIsOfflineMessage() {
-        JOptionPane.showMessageDialog(null,
-                "  Server is offline",
-                "",
-                JOptionPane.ERROR_MESSAGE);
+    public void showIpAndPortInputDialog() {
+        new IpAndPortInputDialog(frame, serverUpdateService);
     }
 
-    public void showInputDialog() {
-        new IpAndPortInputDialog(frame, serverUpdateService);
+    public void showSignInInputDialog() {
+        new SignInInputDialog(frame, serverUpdateService);
     }
 }
