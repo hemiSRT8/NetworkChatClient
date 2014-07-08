@@ -1,11 +1,11 @@
 package ua.khvorov.gui.listeners;
 
 
-import ua.khvorov.network.NetworkClient;
 import ua.khvorov.service.ServerUpdateService;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class SendButtonListener {
 
