@@ -1,7 +1,6 @@
 package ua.khvorov.validator;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 public class Validator {
 
@@ -14,12 +13,9 @@ public class Validator {
     private static final Pattern PORT_PATTERN = Pattern.compile("^\\d{4}$");
 
     public static boolean ipInputValidation(String ip) {
-        if (ip.equals("localhost")) {
-            return true;
-        } else {
-            Matcher matcher = IP_PATTERN.matcher(ip);
-            return matcher.matches();
-        }
+        Matcher matcher = IP_PATTERN.matcher(ip);
+
+        return matcher.matches();
     }
 
     public static boolean portValidation(String port) {

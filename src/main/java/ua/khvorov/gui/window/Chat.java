@@ -1,14 +1,18 @@
 package ua.khvorov.gui.window;
 
-import org.slf4j.*;
-import ua.khvorov.gui.fonts.InputFont;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ua.khvorov.gui.listeners.SendButtonListener;
 import ua.khvorov.service.ServerUpdateService;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static java.awt.Color.*;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.RED;
+import static javax.swing.JOptionPane.showMessageDialog;
+import static ua.khvorov.gui.util.CenterOfDisplay.getXPosition;
+import static ua.khvorov.gui.util.CenterOfDisplay.getYPosition;
 
 public class Chat {
 
@@ -18,26 +22,27 @@ public class Chat {
     private ServerUpdateService serverUpdateService;
     private JFrame frame;
     private JButton sendButton;
+    private IpAndPortDialog ipAndPortDialog;
+    private SignInDialog signInDialog;
+    private RegistrationDialog registrationDialog;
 
     public Chat(ServerUpdateService serverUpdateService) {
         this.serverUpdateService = serverUpdateService;
         frame = initFrame();
-        frame.getRootPane().setDefaultButton(sendButton);
     }
 
     private JFrame initFrame() {
-        JFrame frame = new JFrame();
+        frame = new JFrame();
         frame.add(mainPanel());
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setIconImage(new ImageIcon("resources\\networkChatIcon.png").getImage());
         frame.pack();
         frame.setSize(800, 400);
-        frame.setLocation(screenSize.width / 2 - (frame.getWidth() / 2), //Center of the screen
-                screenSize.height / 2 - (frame.getHeight() / 2));
+        frame.setLocation(getXPosition(frame), getYPosition(frame));
+        frame.getRootPane().setDefaultButton(sendButton);
+        frame.setVisible(false);
 
-        frame.setVisible(true);
         return frame;
     }
 
@@ -57,7 +62,6 @@ public class Chat {
 
         JTextArea inputTextField = new JTextArea();
         inputTextField.setCaretColor(RED);
-        inputTextField.setFont(InputFont.INPUT_FONT);
 
         panel.add(new JScrollPane(inputTextField), BorderLayout.CENTER);
         constructSendButton(inputTextField);
@@ -82,14 +86,56 @@ public class Chat {
 
     public void appendToChat(String message) {
         chatTextArea.append(message + "\n");
-        LOGGER.debug("Message `{}` was successfully appended to chat", message);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Message `{}` was successfully appended to chat", message);
+        }
     }
 
     public void showIpAndPortInputDialog() {
-        new IpAndPortInputDialog(frame, serverUpdateService);
+        ipAndPortDialog = new IpAndPortDialog(frame, serverUpdateService);
     }
 
     public void showSignInInputDialog() {
-        new SignInInputDialog(frame, serverUpdateService);
+        signInDialog = new SignInDialog(frame, serverUpdateService, this);
+    }
+
+    public void showRegistrationInputDialog() {
+        registrationDialog = new RegistrationDialog(frame, serverUpdateService);
+    }
+
+    /**
+     * 0 - Info icon
+     * 1 - Error icon
+     */
+    public static void showInfoMessage(String text, int icon) {
+        showMessageDialog(null,
+                text,
+                "",
+                icon);
+    }
+
+    public static void showInfoMessage(boolean success, String successText, String failText) {
+        if (success) {
+            showInfoMessage(successText, 1);
+        } else {
+            showInfoMessage(failText, 0);
+        }
+    }
+
+    public JFrame getFrame() {
+        return frame;
+    }
+
+    public IpAndPortDialog getIpAndPortDialog() {
+        return ipAndPortDialog;
+    }
+
+    public SignInDialog getSignInDialog() {
+        return signInDialog;
+    }
+
+    public RegistrationDialog getRegistrationDialog() {
+        return registrationDialog;
     }
 }
