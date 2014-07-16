@@ -1,15 +1,13 @@
 package ua.khvorov.network;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 import ua.khvorov.api.message.Message;
 import ua.khvorov.bean.IPAndPort;
 import ua.khvorov.exception.ServerOfflineException;
 import ua.khvorov.service.ServerUpdateService;
 
 import java.io.*;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 
 public class NetworkClient {
 
@@ -33,8 +31,16 @@ public class NetworkClient {
         try {
             socket = new Socket(ip, port);
             LOGGER.info("Socket was successfully created ({}:{})", ip, port);
+
+            new Thread() {
+                public void run() {
+                    serverUpdateService.getChat().showSignInInputDialog();
+                }
+            }.start();
+
             writer = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream reader = new ObjectInputStream(socket.getInputStream());
+
             while (true) {
                 try {
                     serverUpdateService.verifyInputObject(reader.readObject());
@@ -43,18 +49,18 @@ public class NetworkClient {
                 }
             }
 
-        } catch (SocketException connectException) {
+        } catch (ConnectException connectException) {
             LOGGER.info("Server is offline", connectException);
             throw new ServerOfflineException("Server is offline", connectException);
-        } catch (IOException e1) {
-            LOGGER.error("IO exception", e1);
+        } catch (IOException e) {
+            LOGGER.error("IO exception", e);
             try {
                 if (socket != null) {
                     socket.close();
                 }
-                LOGGER.info(String.format("Socket was closed due to IO exception,(ip %s) , (port %d)", ip, port), e1);
+                LOGGER.info(String.format("Socket was closed due to IO exception,(ip %s) , (port %d)", ip, port), e);
             } catch (IOException e2) {
-                LOGGER.error("IO exception while socket closing", e1);
+                LOGGER.error("IO exception while socket closing", e);
             }
         }
     }
@@ -66,6 +72,8 @@ public class NetworkClient {
             LOGGER.error("IO exception", e);
         }
 
-        LOGGER.debug("Message `{}` was sent", message);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Message `{}` was sent", message);
+        }
     }
 }

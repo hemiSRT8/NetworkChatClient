@@ -1,14 +1,16 @@
 package ua.khvorov.service;
 
 import org.slf4j.*;
+import ua.khvorov.api.entity.User;
 import ua.khvorov.api.message.*;
 import ua.khvorov.api.util.NickAndPassword;
 import ua.khvorov.bean.IPAndPort;
 import ua.khvorov.exception.ServerOfflineException;
-import ua.khvorov.gui.window.*;
+import ua.khvorov.gui.window.Chat;
 import ua.khvorov.network.NetworkClient;
 
 import static ua.khvorov.api.message.MessageType.*;
+import static ua.khvorov.gui.window.Chat.*;
 
 public class ServerUpdateService {
 
@@ -19,17 +21,18 @@ public class ServerUpdateService {
     public void initUserUI() {
         chat = new Chat(this);
         chat.showIpAndPortInputDialog();
-        chat.showSignInInputDialog();
     }
 
     public void initNetworkClient(IPAndPort ipAndPort) {
         networkClient = new NetworkClient(ipAndPort, this);
+
         new Thread() {
             public void run() {
                 try {
                     networkClient.run();
                 } catch (ServerOfflineException e) {
-                    InfoMessages.showErrorMessage("server is offline");
+                    showInfoMessage("Server is offline", 0);
+                    chat.getIpAndPortDialog().getDialog().setVisible(true);
                 }
             }
         }.start();
@@ -39,10 +42,30 @@ public class ServerUpdateService {
         Message message = (Message) object;
         Object messageType = message.getType();
         Object messageValue = message.getValue();
+
         if (messageType == TEXT_MESSAGE) {
             incomingMessageUpdate((String) messageValue);
-        } else if (messageType == SIGN_IN) {
-            InfoMessages.showSignInResult((Boolean) messageValue);
+        } else {
+            boolean success = (Boolean) messageValue;
+
+            if (messageType == SIGN_IN) {
+                showInfoMessage(success,
+                        "You are online!", "Not valid login/password");
+                if (success) {
+                    chat.getFrame().setVisible(true);
+                } else {
+                    chat.getSignInDialog().getDialog().setVisible(true);
+                }
+            } else if (messageType == REGISTRATION) {
+                showInfoMessage(success,
+                        "You was successfully registered,now you can log in !", "Nickname was already registered");
+
+                if (success) {
+                    chat.getSignInDialog().getDialog().setVisible(true);
+                } else {
+                    chat.getRegistrationDialog().getDialog().setVisible(true);
+                }
+            }
         }
     }
 
@@ -51,14 +74,25 @@ public class ServerUpdateService {
     }
 
     public void sendMessage(String text) {
-        Message message = new Message<MessageType, String>(TEXT_MESSAGE, text);
+        Message message = new Message<MessageType, String>(TEXT_MESSAGE, text.trim());
         networkClient.sendMessage(message);
 
-        LOGGER.debug("message `{}` was sent", text);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("message `{}` was sent", text);
+        }
     }
 
     public void sendMessage(NickAndPassword nickAndPassword) {
         Message message = new Message<MessageType, NickAndPassword>(SIGN_IN, nickAndPassword);
         networkClient.sendMessage(message);
+    }
+
+    public void sendMessage(User user) {
+        Message message = new Message<MessageType, User>(REGISTRATION, user);
+        networkClient.sendMessage(message);
+    }
+
+    public Chat getChat() {
+        return chat;
     }
 }
